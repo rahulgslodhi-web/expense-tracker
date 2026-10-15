@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Indian Personal Finance & Investment Tracker</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f8f6f0">
+  
+  <!-- Modern Google Font: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Full-Width Responsive Mobile Web Application Shell -->
+  <div id="app" class="app-shell">
+
+    <!-- Top Navigation Header -->
+    <header class="app-top-header">
+      <div class="header-inner">
+        <div class="brand-title-wrap">
+          <span class="brand-currency-symbol">₹</span>
+          <span class="brand-app-name">PaisaTrack</span>
+        </div>
+        <div class="header-actions-wrap" style="display:flex; align-items:center; gap:8px;">
+          <button class="user-header-chip" id="headerUserChip" onclick="authManager.openAuthModal('account')" aria-label="User Account and Persistence Settings" title="Account & Persistence">
+            <span class="user-chip-avatar" id="headerUserAvatar">RL</span>
+            <span class="user-chip-name" id="headerUserName">Rahul L.</span>
+            <span class="user-chip-badge" id="headerUserSyncBadge" title="Saved & Synced">
+              <span class="sync-dot"></span>
+            </span>
+          </button>
+          <button class="btn-data-reset btn-header-sync" onclick="authManager.openAuthModal('backup')" title="Cloud & File Backup">
+            ☁️
+          </button>
+          <button class="btn-data-reset" onclick="openModal('startFreshModal')" title="Start clean with your own details" style="color:#234d3d; font-weight:700;">
+            + Custom
+          </button>
+          <button class="btn-data-reset" onclick="app.store.resetToDefault(); showToast('Reset to original sample data');" title="Reset sample data">
+            ↺
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Responsive Content Container -->
+    <main class="app-content-container">
+
+      <!-- ========================================== -->
+      <!-- TAB 1: OVERVIEW DASHBOARD -->
+      <!-- ========================================== -->
+      <section id="tab-overview" class="app-screen-view active-tab">
+        <!-- Top Greeting Row with Real-Time Clock -->
+        <div class="screen-header-row">
+          <div class="greeting-block">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+              <div class="realtime-live-badge">
+                <span class="pulse-dot"></span>
+                <span id="realtimeLiveClock">Live Sync</span>
+              </div>
+            </div>
+            <h1 id="overviewGreeting" class="greeting-title">Good Morning, Rahul 👋</h1>
+            <p class="greeting-subtitle">Here's your real-time financial snapshot</p>
+          </div>
+          <button class="header-action-btn" onclick="openModal('notificationsModal')" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="notification-dot"></span>
+          </button>
+        </div>
+
+        <!-- Smart Alert Banner -->
+        <div id="smartAlertContainer"></div>
+
+        <!-- Month Selector -->
+        <div class="month-selector-bar">
+          <button class="month-nav-arrow btn-prev-month" aria-label="Previous month">‹</button>
+          <span id="overviewMonthText">October 2026</span>
+          <button class="month-nav-arrow btn-next-month" aria-label="Next month">›</button>
+        </div>
+
+        <!-- 4 Metrics 2x2 Grid -->
+        <div class="metrics-2x2-grid">
+          <div class="metric-stat-card clickable-stat" onclick="openModal('manageIncomeModal')" title="Tap to view and edit income streams">
+            <span id="statIncome" class="metric-amount income-highlight">₹75,000</span>
+            <span class="metric-label">Monthly Income <span style="font-size:0.7rem; color:#1e6d37; font-weight:700;">✎ Edit</span></span>
+          </div>
+          <div class="metric-stat-card">
+            <span id="statExpenses" class="metric-amount">₹32,400</span>
+            <span class="metric-label">Total Expenses</span>
+          </div>
+          <div class="metric-stat-card">
+            <span id="statInvested" class="metric-amount">₹18,000</span>
+            <span class="metric-label">Invested Outflow</span>
+          </div>
+          <div class="metric-stat-card">
+            <span id="statRemaining" class="metric-amount">₹24,600</span>
+            <span class="metric-label">Remaining Balance</span>
+          </div>
+        </div>
+
+        <!-- Income Utilisation (Pie/Donut Chart) -->
+        <div class="app-card">
+          <div class="card-heading-row">
+            <div>
+              <h2 class="card-title">Income Utilisation</h2>
+              <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Breakdown of monthly earnings</div>
+            </div>
+            <button class="card-action-link" style="border:none; background:none;" onclick="openModal('manageIncomeModal')">Manage Income</button>
+          </div>
+          <div id="incomeDonutContainer">
+            <!-- Rendered dynamically by ChartRenderer -->
+          </div>
+        </div>
+
+        <!-- Upcoming Actions List -->
+        <div class="app-card">
+          <div class="card-heading-row">
+            <h2 class="card-title">Upcoming Actions</h2>
+            <a class="card-action-link" onclick="app.switchTab('spending'); app.switchSpendingSubTab('category');">View All</a>
+          </div>
+          <div id="upcomingActionsList">
+            <!-- Populated by app.js -->
+          </div>
+        </div>
+
+        <!-- Financial Statement & Reports Export Card -->
+        <div class="app-card export-overview-card" id="overviewExportCard">
+          <div class="card-heading-row" style="margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="export-icon-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </div>
+              <div>
+                <h2 class="card-title">Financial Statement & Reports</h2>
+                <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:1px;">Tax Audits, Monthly Budgeting & Portfolio Ledger</div>
+              </div>
+            </div>
+            <span class="badge-pill" style="font-size:0.72rem; padding:3px 8px; background:var(--brand-green-light); color:var(--brand-green-text); font-weight:700;">₹ Ready</span>
+          </div>
+
+          <p class="export-card-subtitle">
+            Export comprehensive monthly or custom period statements for tax filing, personal budgeting, and accounting.
+          </p>
+
+          <div class="export-card-button-row">
+            <button type="button" class="btn-export-primary" onclick="exportManager.openExportModal('all')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>📥 Export Statement</span>
+            </button>
+            <div class="export-format-chips">
+              <span class="export-chip"><span style="color:#15803d;">📗</span> Excel (.xlsx/.csv)</span>
+              <span class="export-chip"><span style="color:#b91c1c;">📕</span> PDF Report</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 2: SPENDING & EXPENSES TRACKER -->
+      <!-- ========================================== -->
+      <section id="tab-spending" class="app-screen-view">
+        <!-- Screen Title Bar -->
+        <div class="screen-title-bar">
+          <h1 class="screen-main-title">Spending</h1>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="inflow-manage-btn" onclick="exportManager.openExportModal('expenses')" style="font-size:0.76rem; padding:6px 10px; background:#eaf3ed; color:#1d3c34; border-color:#bbf7d0;" title="Export Spending Statement">
+              📥 Export
+            </button>
+            <button class="inflow-manage-btn" onclick="app.openAddExpenseModal('upcoming')" style="font-size:0.76rem; padding:6px 12px; background:#fef3c7; color:#92400e; border-color:#fde68a;">
+              🕒 + Upcoming Bill
+            </button>
+            <button class="inflow-manage-btn" onclick="app.openAddExpenseModal('paid')" style="font-size:0.76rem; padding:6px 12px;">
+              + Log Expense
+            </button>
+          </div>
+        </div>
+
+        <!-- Month Selector -->
+        <div class="month-selector-bar">
+          <button class="month-nav-arrow btn-prev-month">‹</button>
+          <span id="spendingMonthText">October 2026</span>
+          <button class="month-nav-arrow btn-next-month">›</button>
+        </div>
+
+        <!-- Monthly Fixed Income & Inflow Card -->
+        <div class="spending-inflow-card">
+          <div class="inflow-header-row">
+            <div>
+              <span class="inflow-title-label">Monthly Fixed Income</span>
+              <div id="spendingFixedIncomeDisplay" class="inflow-amount-number">₹75,000</div>
+            </div>
+            <button class="inflow-manage-btn" onclick="openModal('manageIncomeModal')">
+              ✏️ Edit Fixed Income
+            </button>
+          </div>
+          <div class="inflow-stats-row">
+            <div class="inflow-stat">
+              <span class="inflow-stat-label">Fixed Recurring Bills</span>
+              <span id="spendingTotalFixedExpenses" class="inflow-stat-val">₹15,198</span>
+            </div>
+            <div class="inflow-stat-divider"></div>
+            <div class="inflow-stat">
+              <span class="inflow-stat-label">Discretionary Leftover</span>
+              <span id="spendingDiscretionaryBudget" class="inflow-stat-val success">₹59,802</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Expenses Summary Card -->
+        <div class="spending-hero-card">
+          <div class="spending-hero-top">
+            <span class="spending-hero-label">Total Expenses</span>
+            <span id="spendingGrowthPercent" class="growth-badge">↑ 12%</span>
+          </div>
+          <div id="spendingTotalNumber" class="spending-big-number">₹32,400</div>
+          <div id="spendingPrevMonthText" class="spending-hero-sub">vs. last month (₹29,000)</div>
+        </div>
+
+        <!-- Segment Tabs -->
+        <div id="spendingSegmentTabs" class="segment-tabs-wrap">
+          <button class="segment-tab-btn active" data-subtab="category">By Category</button>
+          <button class="segment-tab-btn" data-subtab="tx">Transactions & Edit</button>
+        </div>
+
+        <!-- Category Breakdown List -->
+        <div id="spendingCategoryListContainer"></div>
+
+        <!-- Transactions Log List with Edit/Delete -->
+        <div id="spendingTxListContainer" style="display: none;"></div>
+
+        <!-- Fixed Expenses Section -->
+        <div class="app-card" style="margin-top: 18px;">
+          <div class="card-heading-row">
+            <div>
+              <h2 class="card-title">Fixed Expenses</h2>
+              <div style="font-size:0.74rem; color:var(--text-secondary); margin-top:2px;">Recurring monthly bills</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="card-action-link" style="border:none; background:none; font-weight:700; color:var(--brand-green);" onclick="openModal('addFixedExpenseModal')">+ Add Fixed</button>
+              <button class="card-action-link" style="border:none; background:none;" onclick="openModal('manageFixedModal')">Manage</button>
+            </div>
+          </div>
+          <div id="fixedExpensesList">
+            <!-- Populated by app.js with Edit & Delete actions -->
+          </div>
+        </div>
+
+        <!-- Upcoming Bills Section -->
+        <div class="app-card">
+          <div class="card-heading-row">
+            <div>
+              <h2 class="card-title">Upcoming Bills & Dues</h2>
+              <div style="font-size:0.74rem; color:var(--text-secondary); margin-top:2px;">Real-time scheduled obligations & dues</div>
+            </div>
+            <button class="card-action-link" style="border:none; background:none; font-weight:700; color:var(--brand-green);" onclick="app.openAddExpenseModal('upcoming')">+ Add Bill</button>
+          </div>
+          <div id="upcomingExpensesList">
+            <!-- Populated by app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 3: INVESTMENTS & SIP TRACKER -->
+      <!-- ========================================== -->
+      <section id="tab-investments" class="app-screen-view">
+        <!-- Screen Title Bar -->
+        <div class="screen-title-bar">
+          <h1 class="screen-main-title">Investments</h1>
+          <button class="icon-circle-btn" onclick="openModal('addInvestmentModal')" title="Add Investment">+</button>
+        </div>
+
+        <!-- Total Portfolio Card -->
+        <div class="portfolio-hero-card">
+          <div class="portfolio-hero-top">
+            <div class="portfolio-hero-left">
+              <div class="portfolio-label-row">
+                <span>Total Portfolio Value</span>
+                <span>⌄</span>
+              </div>
+              <div id="investmentsTotalValue" class="portfolio-big-value">₹6,48,200</div>
+              <div class="portfolio-gain-row">
+                <span id="investmentsGainBadge">▲ 12.4%</span>
+                <span id="investmentsGainAmount">+₹71,200 (1Y)</span>
+              </div>
+            </div>
+            <div id="investmentsSparklineContainer">
+              <!-- SVG Sparkline -->
+            </div>
+          </div>
+          <div id="investmentsAsOfTag" class="portfolio-as-of">As of 1 Oct 2026</div>
+        </div>
+
+        <!-- Segment Tabs -->
+        <div id="investmentsSegmentTabs" class="segment-tabs-wrap">
+          <button class="segment-tab-btn active" data-subtab="holdings">Holdings</button>
+          <button class="segment-tab-btn" data-subtab="sips">SIPs</button>
+          <button class="segment-tab-btn" data-subtab="tx">Transactions / Redemptions</button>
+        </div>
+
+        <!-- Holdings Sub-tab Content -->
+        <div id="invHoldingsContainer">
+          
+          <!-- Asset Allocation Donut Chart -->
+          <div class="app-card">
+            <div class="card-heading-row">
+              <div>
+                <h2 class="card-title">Asset Allocation</h2>
+                <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Distribution across Indian Asset Classes</div>
+              </div>
+            </div>
+            <div id="investmentAssetDonutContainer">
+              <!-- Asset Allocation Donut -->
+            </div>
+          </div>
+
+          <!-- Interactive Asset Class Filter Pills -->
+          <div class="asset-filter-pill-bar" id="investmentFilterPills">
+            <button class="filter-pill-btn active" data-filter="all" onclick="app.setInvestmentFilter('all')">All Assets</button>
+            <button class="filter-pill-btn" data-filter="mf" onclick="app.setInvestmentFilter('mf')">Mutual Funds</button>
+            <button class="filter-pill-btn" data-filter="eq" onclick="app.setInvestmentFilter('eq')">Equities</button>
+            <button class="filter-pill-btn" data-filter="ot" onclick="app.setInvestmentFilter('ot')">Others / FDs / Gold</button>
+          </div>
+
+          <!-- Asset Class Breakdown Cards (Clickable to Filter) -->
+          <div id="assetClassList">
+            <!-- Populated by app.js -->
+          </div>
+
+          <!-- Holdings List (Filtered & with Redeem/Edit/Delete actions) -->
+          <div class="app-card" style="margin-top: 14px;">
+            <div class="card-heading-row">
+              <h2 id="holdingsListHeaderTitle" class="card-title">Holdings</h2>
+              <button class="card-action-link" style="background:none; border:none;" onclick="openModal('addInvestmentModal')">+ Add Holding</button>
+            </div>
+            <div id="topHoldingsList">
+              <!-- Populated by app.js with Redeem, Edit, Delete -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SIPs Sub-tab Content -->
+        <div id="invSIPsContainer" style="display: none;"></div>
+
+        <!-- Transactions & Redemptions Sub-tab Content -->
+        <div id="invTxContainer" style="display: none;"></div>
+
+        <!-- Dual Quick-Action Buttons (Add Investment / Add SIP) -->
+        <div class="investment-actions-dual">
+          <button class="btn-action-light" onclick="openModal('addInvestmentModal')">+ Add Investment</button>
+          <button class="btn-action-primary" onclick="openModal('addSipModal')">+ Set Up SIP</button>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 4: GOALS & AI ASSISTANT VAULTS -->
+      <!-- ========================================== -->
+      <section id="tab-goals" class="app-screen-view">
+        <!-- Screen Title Bar -->
+        <div class="screen-title-bar">
+          <h1 class="screen-main-title">Goals</h1>
+          <button class="icon-circle-btn" onclick="openModal('addGoalModal')" title="Create New Goal">+</button>
+        </div>
+
+        <!-- Inspiration Hero Card with Mountain Vector Illustration -->
+        <div class="goals-hero-card">
+          <div class="goals-hero-text">
+            <h2 class="goals-hero-heading">Turn your dreams into a plan</h2>
+            <p class="goals-hero-desc">Set a goal, track your progress, and stay on course.</p>
+          </div>
+          <!-- Mountain Vector Graphic -->
+          <svg class="goals-hero-illustration" viewBox="0 0 140 100" fill="none">
+            <path d="M10 100 L55 45 L90 85 L140 100 Z" fill="#ebd6bf" opacity="0.7"/>
+            <polygon points="40,100 95,20 140,100" fill="#3c5244"/>
+            <polygon points="95,20 140,100 120,100" fill="#2d3d33"/>
+            <line x1="95" y1="20" x2="95" y2="8" stroke="#d46b43" stroke-width="2"/>
+            <polygon points="95,8 106,12 95,16" fill="#d46b43"/>
+            <circle cx="28" cy="28" r="16" fill="#f7d49b" opacity="0.45"/>
+          </svg>
+        </div>
+
+        <!-- Segment Tabs -->
+        <div id="goalsSegmentTabs" class="segment-tabs-wrap">
+          <button class="segment-tab-btn active" data-subtab="my-goals">My Goals</button>
+          <button class="segment-tab-btn" data-subtab="ai-helper">AI Goal Helper</button>
+        </div>
+
+        <!-- My Goals Section -->
+        <div id="myGoalsTabSection">
+          <!-- Populated by app.js -->
+        </div>
+
+        <!-- AI Goal Helper Section -->
+        <div id="aiGoalHelperSection" style="display: none;">
+          <div class="ai-helper-card">
+            <span class="ai-helper-badge">✨ AI Financial Planner</span>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+              Enter your target amount and timeline. Our Indian financial velocity engine computes the exact monthly SIP needed accounting for compound growth.
+            </p>
+
+            <div class="input-field-group">
+              <label class="input-label">Target Goal Amount (₹)</label>
+              <input id="aiCalcTargetAmount" class="input-control" type="number" value="500000" step="10000">
+            </div>
+
+            <div class="input-field-group">
+              <label class="input-label">Target Time Horizon (Months)</label>
+              <input id="aiCalcMonths" class="input-control" type="number" value="24" min="6" max="360">
+            </div>
+
+            <div class="input-field-group">
+              <label class="input-label">Expected Annual Return (% p.a.)</label>
+              <input id="aiCalcReturnRate" class="input-control" type="number" value="12" step="0.5">
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+                Benchmarks: Equity MFs ~12%, Hybrid/Balanced ~10%, Debt/FD ~7%
+              </div>
+            </div>
+
+            <div class="input-field-group">
+              <label class="input-label">Current Savings Already Allocated (₹)</label>
+              <input id="aiCalcCurrentSaved" class="input-control" type="number" value="100000" step="5000">
+            </div>
+
+            <!-- Computed AI Result Panel -->
+            <div class="ai-result-panel">
+              <div style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 600;">RECOMMENDED MONTHLY CONTRIBUTION</div>
+              <div id="aiCalcRecommendedSIP" class="ai-result-rec-sip">₹13,850 / mo</div>
+              <div id="aiCalcWealthGain" style="font-size: 0.8rem; font-weight: 600; color: #1e6d37;">Est. Returns: +₹67,600 (12% p.a.)</div>
+              <div style="margin-top: 6px;">
+                <span id="aiCalcVelocityBadge" class="status-pill on-track">Highly Achievable Pace</span>
+              </div>
+
+              <div id="aiCalcAdviceList" style="margin-top: 10px; border-top: 1px dashed #d5e5db; padding-top: 8px;">
+                <!-- AI Bullet insights -->
+              </div>
+            </div>
+
+            <button class="btn-full-primary" onclick="openModal('addSipModal');">
+              + Set up SIP for this Goal
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 5: PROFILE & PERSONAL INFO -->
+      <!-- ========================================== -->
+      <section id="tab-profile" class="app-screen-view">
+        <!-- Screen Title Bar -->
+        <div class="screen-title-bar">
+          <h1 class="screen-main-title">Profile</h1>
+          <button class="header-action-btn" onclick="openModal('editPersonalDetailsModal')" title="Edit Profile Details">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- User Card -->
+        <div class="profile-avatar-card">
+          <div class="profile-avatar-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="profile-meta-wrap">
+            <h2 id="profileUserName" class="profile-user-name">Rahul Lodhi</h2>
+            <span id="profileUserSub" class="profile-user-sub">24 yrs • Hyderabad</span>
+            <span id="profileUserEmail" class="profile-user-email">rahul@example.com</span>
+          </div>
+        </div>
+
+        <!-- Financial Profile Card -->
+        <div class="profile-section-card">
+          <div class="card-heading-row">
+            <h2 class="card-title">Financial Profile</h2>
+            <a class="card-action-link" onclick="openModal('editFinancialProfileModal')">Edit Financials</a>
+          </div>
+          
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Monthly Income Baseline</span>
+              <span id="profileMonthlyIncome" class="profile-row-val">₹75,000</span>
+            </div>
+            <button class="btn-mini-edit" style="margin-left:auto;" onclick="openModal('manageIncomeModal')">Edit Inflows</button>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Employment & Role</span>
+              <span id="profileEmployment" class="profile-row-val">ICICI Securities • Senior Financial Analyst</span>
+            </div>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Risk Profile</span>
+              <span id="profileRisk" class="profile-row-val">Moderate</span>
+            </div>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Investment Preferences</span>
+              <span id="profilePref" class="profile-row-val">Mutual Funds, Equities</span>
+            </div>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Tax Regime</span>
+              <span id="profileTaxRegime" class="profile-row-val">New Tax Regime (FY 2026-27)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal Details Card -->
+        <div class="profile-section-card">
+          <div class="card-heading-row">
+            <h2 class="card-title">Personal Details</h2>
+            <a class="card-action-link" onclick="openModal('editPersonalDetailsModal')">Edit Details</a>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Full Name</span>
+              <span id="profileFullName" class="profile-row-val">Rahul Lodhi</span>
+            </div>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Date of Birth & Age</span>
+              <span id="profileDOB" class="profile-row-val">28 Jun 2002 (Age: 24 yrs)</span>
+            </div>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Phone Number</span>
+              <span id="profilePhone" class="profile-row-val">+91 98765 43210</span>
+            </div>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Email</span>
+              <span id="profileEmailDisplay" class="profile-row-val">rahul@example.com</span>
+            </div>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">PAN / KYC</span>
+              <span id="profilePAN" class="profile-row-val">ABCPL9482K (KYC Verified)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Security & Cloud Persistence Card -->
+        <div class="profile-section-card">
+          <div class="card-heading-row">
+            <h2 class="card-title">Account & Cloud Persistence</h2>
+            <span id="profileAccountTypePill" class="badge-pill" style="font-size:0.75rem; padding:4px 8px; border-radius:12px; font-weight:700;">Active Account</span>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Logged-in Profile</span>
+              <span id="profileActiveAccountName" class="profile-row-val" style="font-weight:700;">Rahul Lodhi</span>
+              <span id="profileActiveAccountEmail" style="font-size:0.8rem; color:#6e7671;">rahul@example.com</span>
+            </div>
+            <button class="btn-mini-edit" style="margin-left:auto;" onclick="authManager.openAuthModal('account')">Manage</button>
+          </div>
+
+          <div class="profile-row-item">
+            <div class="profile-row-icon" style="color:#1e6d37;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <div class="profile-row-info">
+              <span class="profile-row-label">Storage Resilience Engine</span>
+              <span class="profile-row-val" style="color:#1e6d37; font-size:0.85rem; font-weight:700;">Dual-Layer: LocalStorage + IndexedDB</span>
+              <span style="font-size:0.75rem; color:#6e7671;">Data is safeguarded against mobile tab close & cache trim.</span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+            <button type="button" class="btn-full-secondary" style="margin:0; font-size:0.85rem; padding:10px;" onclick="authManager.exportBackup(); showToast('Backup file downloaded!', '📥');">
+              📥 Download Backup
+            </button>
+            <button type="button" class="btn-full-secondary" style="margin:0; font-size:0.85rem; padding:10px;" onclick="authManager.openAuthModal('backup');">
+              📤 Restore Data
+            </button>
+          </div>
+          <button type="button" class="btn-full-secondary" style="margin-top:8px; font-size:0.85rem; padding:10px;" onclick="authManager.openAuthModal('login');">
+            ⇄ Switch / Change Account
+          </button>
+        </div>
+
+        <!-- Export Financial Statement Card in Profile -->
+        <div class="profile-section-card">
+          <div class="card-heading-row">
+            <h2 class="card-title">Tax & Financial Statements</h2>
+            <span class="badge-pill" style="font-size:0.75rem; padding:4px 8px; border-radius:12px; font-weight:700; background:#eaf3ed; color:#1e6d37;">Bank Grade</span>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin:6px 0 12px 0; line-height:1.4;">
+            Generate itemized financial statements for income tax audits, ITR filing, personal expense reconciliation, and portfolio valuation.
+          </p>
+          <button type="button" class="btn-full-primary" style="margin:0; font-size:0.88rem; padding:11px;" onclick="exportManager.openExportModal('all')">
+            📥 Export Financial Statement (Excel / PDF)
+          </button>
+        </div>
+
+        <!-- Custom User Setup Action -->
+        <button class="btn-full-secondary" onclick="openModal('startFreshModal')">
+          🚀 Setup Custom Demographic & Financial Situation
+        </button>
+      </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- FIXED EDGE-TO-EDGE BOTTOM NAVIGATION BAR -->
+    <!-- ========================================== -->
+    <nav class="bottom-navigation-bar" aria-label="Main Navigation">
+      <div class="bottom-nav-inner">
+        <!-- 1. Overview -->
+        <button class="nav-tab-item active" data-tab="overview">
+          <svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          </svg>
+          <span class="nav-tab-label">Overview</span>
+        </button>
+
+        <!-- 2. Spending -->
+        <button class="nav-tab-item" data-tab="spending">
+          <svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          <span class="nav-tab-label">Spending</span>
+        </button>
+
+        <!-- 3. Investments -->
+        <button class="nav-tab-item" data-tab="investments">
+          <svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span class="nav-tab-label">Investments</span>
+        </button>
+
+        <!-- 4. Goals -->
+        <button class="nav-tab-item" data-tab="goals">
+          <svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span class="nav-tab-label">Goals</span>
+        </button>
+
+        <!-- 5. Profile -->
+        <button class="nav-tab-item" data-tab="profile">
+          <svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="nav-tab-label">Profile</span>
+        </button>
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODALS & BOTTOM SHEETS -->
+  <!-- ========================================== -->
+
+  <!-- 1. Log New Expense Modal (With Expense Type Toggle: Paid vs Upcoming) -->
+  <div id="addExpenseModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <div>
+          <h3 id="addExpenseModalTitle" class="sheet-title">Log Expense</h3>
+          <div id="addExpenseModalSub" style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Track paid expenses or schedule upcoming dues</div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- Segmented Type Selector -->
+      <div class="expense-type-toggle">
+        <button type="button" class="expense-type-btn active" id="btnTypePaid" onclick="app.setExpenseType('paid')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Already Paid
+        </button>
+        <button type="button" class="expense-type-btn" id="btnTypeUpcoming" onclick="app.setExpenseType('upcoming')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Upcoming Due / Bill
+        </button>
+      </div>
+      <input type="hidden" id="expenseTypeInput" value="paid">
+
+      <form id="addExpenseForm">
+        <div class="input-field-group">
+          <label id="expenseTitleLabel" class="input-label">Expense Title</label>
+          <input id="expenseTitleInput" class="input-control" type="text" placeholder="e.g. Swiggy Gourmet, Uber to Hitec City" required>
+        </div>
+        <div class="input-field-group">
+          <label id="expenseAmountLabel" class="input-label">Amount (₹)</label>
+          <input id="expenseAmountInput" class="input-control" type="number" placeholder="₹ Amount" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Category</label>
+          <select id="expenseCategorySelect" class="input-control">
+            <option value="Food & Dining">Food & Dining</option>
+            <option value="Rent & Housing">Rent & Housing</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Transport">Transport</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div id="expenseModeGroup" class="input-field-group">
+          <label class="input-label">Payment Mode</label>
+          <select id="expenseModeSelect" class="input-control">
+            <option value="Google Pay UPI">Google Pay UPI</option>
+            <option value="PhonePe UPI">PhonePe UPI</option>
+            <option value="HDFC Millennia Credit Card">HDFC Millennia Credit Card</option>
+            <option value="ICICI Amazon Pay Card">ICICI Amazon Pay Card</option>
+            <option value="Net Banking">Net Banking</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label id="expenseDateLabel" class="input-label">Payment Date (Real-Time Auto-Filled)</label>
+          <input id="expenseDateInput" class="input-control" type="date" required>
+        </div>
+        <button id="addExpenseSubmitBtn" type="submit" class="btn-full-primary">Record Paid Expense</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 1b. Set Category Budgets Modal -->
+  <div id="setBudgetsModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <div>
+          <h3 class="sheet-title">Category Spending Limits</h3>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Set monthly budget caps to trigger overspending alerts</div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <div style="background:#fdfbf7; border:1px solid #ebd9c8; border-radius:12px; padding:12px 14px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.8rem; color:var(--text-secondary);">Monthly Income: <strong id="budgetModalIncomeDisplay" style="color:var(--brand-green);">₹75,000</strong></span>
+          <span id="budgetModalTotalAllocatedBadge" class="status-pill on-track" style="font-size:0.72rem;">Allocated: ₹36,500</span>
+        </div>
+      </div>
+
+      <form id="setCategoryBudgetsForm">
+        <div id="categoryBudgetInputsContainer" style="display:flex; flex-direction:column; gap:12px; max-height:48vh; overflow-y:auto; padding-right:4px;">
+          <!-- Populated dynamically by app.js with each category's name, icon, current spent, and budget input -->
+        </div>
+        <button type="submit" class="btn-full-primary" style="margin-top:16px;">Save All Category Budgets</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 1c. Allot Budget for Particular Category Modal -->
+  <div id="singleCategoryBudgetModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <div>
+          <h3 id="singleCatModalTitle" class="sheet-title">Allot Category Budget</h3>
+          <div id="singleCatModalSub" style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Set monthly spending limit for this category</div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="app-card" style="padding:14px; margin-bottom:14px; background:#fdfbf7; border:1px solid #ebd9c8;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+          <div id="singleCatIconBubble" class="category-icon-bubble" style="width:40px; height:40px; min-width:40px; display:flex; align-items:center; justify-content:center; background:#fcf0eb; color:#d46b43; border-radius:10px;">
+            <!-- Category SVG -->
+          </div>
+          <div>
+            <div id="singleCatName" style="font-weight:700; font-size:1.02rem; color:var(--text-primary);">Food & Dining</div>
+            <div id="singleCatCurrentSpend" style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">Spent this month: ₹8,500</div>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed #ebd9c8;">
+          <span style="font-size:0.75rem; color:var(--text-secondary);">Current Status:</span>
+          <span id="singleCatStatusPill" class="cat-budget-pill ok">Within Limit</span>
+        </div>
+      </div>
+
+      <form id="singleCategoryBudgetForm">
+        <input type="hidden" id="singleCatIdInput">
+        <div class="input-field-group">
+          <label class="input-label">Monthly Spending Limit / Budget (₹)</label>
+          <input id="singleCatBudgetInput" class="input-control" type="number" min="0" step="500" placeholder="e.g. 8000" required>
+        </div>
+
+        <!-- Quick suggestion chips -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:0.74rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Quick Presets:</div>
+          <div id="singleCatPresetChips" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <!-- Populated dynamically by app.js -->
+          </div>
+        </div>
+
+        <button type="submit" class="btn-full-primary" id="singleCatSubmitBtn">Save Category Budget</button>
+        <button type="button" class="btn-full-secondary" style="margin-top:8px;" onclick="app.openSetBudgetsModal(document.getElementById('singleCatIdInput').value)">View & Allot All Categories</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Edit Existing Expense Modal -->
+  <div id="editExpenseModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Edit Expense</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="editExpenseForm">
+        <input type="hidden" id="editExpenseId">
+        <div class="input-field-group">
+          <label class="input-label">Expense Title</label>
+          <input id="editExpenseTitleInput" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Amount (₹)</label>
+          <input id="editExpenseAmountInput" class="input-control" type="number" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Category</label>
+          <select id="editExpenseCategorySelect" class="input-control">
+            <option value="Food & Dining">Food & Dining</option>
+            <option value="Rent & Housing">Rent & Housing</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Transport">Transport</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Payment Mode</label>
+          <select id="editExpenseModeSelect" class="input-control">
+            <option value="Google Pay UPI">Google Pay UPI</option>
+            <option value="PhonePe UPI">PhonePe UPI</option>
+            <option value="HDFC Millennia Credit Card">HDFC Millennia Credit Card</option>
+            <option value="ICICI Amazon Pay Card">ICICI Amazon Pay Card</option>
+            <option value="Net Banking">Net Banking</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Date</label>
+          <input id="editExpenseDateInput" class="input-control" type="date">
+        </div>
+        <button type="submit" class="btn-full-primary">Save Expense Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Add Investment Modal -->
+  <div id="addInvestmentModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Record Lump-Sum Investment</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="addInvestmentForm">
+        <div class="input-field-group">
+          <label class="input-label">Fund / Stock / Asset Name</label>
+          <input id="invNameInput" class="input-control" type="text" placeholder="e.g. UTI Nifty 50 Index Fund, HDFC Bank, SBI FD" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Asset Classification</label>
+          <select id="invTypeSelect" class="input-control">
+            <option value="Mutual Funds">Mutual Funds</option>
+            <option value="Equities">Equities / Direct Stocks</option>
+            <option value="Others">Others (Fixed Deposit, SGB, Emergency Buffer)</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Investment Amount (₹)</label>
+          <input id="invAmountInput" class="input-control" type="number" placeholder="₹ Amount" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Purchase NAV / Share Price (Optional)</label>
+          <input id="invNavInput" class="input-control" type="number" step="0.01" placeholder="₹ NAV">
+        </div>
+        <button type="submit" class="btn-full-primary">Save Investment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Edit Investment Holding Modal -->
+  <div id="editHoldingModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Edit Investment Holding</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="editHoldingForm">
+        <input type="hidden" id="editHoldingId">
+        <div class="input-field-group">
+          <label class="input-label">Asset / Fund Name</label>
+          <input id="editHoldingNameInput" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Asset Type</label>
+          <select id="editHoldingTypeSelect" class="input-control">
+            <option value="Mutual Funds">Mutual Funds</option>
+            <option value="Equities">Equities</option>
+            <option value="Others">Others (Gold, FD, PPF)</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Current Valuation (₹)</label>
+          <input id="editHoldingValueInput" class="input-control" type="number" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Gain / Return %</label>
+          <input id="editHoldingGainInput" class="input-control" type="number" step="0.1" required>
+        </div>
+        <button type="submit" class="btn-full-primary">Update Holding</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Redeem Investment Modal -->
+  <div id="redeemHoldingModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Redeem / Withdraw Investment</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="redeemHoldingForm">
+        <input type="hidden" id="redeemHoldingId">
+        
+        <div style="background:#f9f7f2; border:1px solid #e9e4dc; border-radius:12px; padding:12px; margin-bottom: 14px;">
+          <div style="font-size:0.75rem; color:var(--text-secondary);">REDEEMING FROM</div>
+          <div id="redeemHoldingNameDisplay" style="font-size:0.95rem; font-weight:700; color:var(--text-primary); margin-top:2px;">-</div>
+          <div style="font-size:0.8rem; color:var(--brand-green); margin-top:4px;">Available Valuation: <strong id="redeemHoldingBalanceDisplay">₹0</strong></div>
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-label">Redemption Amount (₹)</label>
+          <input id="redeemAmountInput" class="input-control" type="number" placeholder="Amount to redeem in ₹" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Redemption Date</label>
+          <input id="redeemDateInput" class="input-control" type="date">
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Credit Destination</label>
+          <select id="redeemDestinationSelect" class="input-control">
+            <option value="Bank Account (HDFC/ICICI)">Primary Bank Savings Account</option>
+            <option value="Emergency Cash Vault">Emergency Buffer / Cash</option>
+            <option value="Re-invest into another Asset">Re-invest into another asset</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Notes (Optional)</label>
+          <input id="redeemNotesInput" class="input-control" type="text" placeholder="e.g. Partial profit booking, emergency expense">
+        </div>
+        <button type="submit" class="btn-full-primary" style="background:#b8552f;">Confirm Redemption</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Add Recurring SIP Modal -->
+  <div id="addSipModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Set up Recurring SIP</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="addSipForm">
+        <div class="input-field-group">
+          <label class="input-label">Mutual Fund Name</label>
+          <input id="sipFundInput" class="input-control" type="text" placeholder="e.g. Parag Parikh Flexi Cap Fund" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Monthly SIP Amount (₹)</label>
+          <input id="sipAmountInput" class="input-control" type="number" placeholder="₹ Amount" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">SIP Cycle Date</label>
+          <select id="sipDaySelect" class="input-control">
+            <option value="1">1st of every month</option>
+            <option value="5" selected>5th of every month</option>
+            <option value="10">10th of every month</option>
+            <option value="15">15th of every month</option>
+            <option value="20">20th of every month</option>
+            <option value="25">25th of every month</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Link to Goal (Optional)</label>
+          <select id="sipGoalSelect" class="input-control">
+            <option value="General Wealth">General Wealth Accumulation</option>
+            <option value="Emergency Fund">Emergency Fund</option>
+            <option value="Home Renovation">Home Renovation</option>
+            <option value="Europe Trip">Europe Trip</option>
+            <option value="New Car">New Car</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-full-primary">Start Monthly SIP</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Create Goal Modal -->
+  <div id="addGoalModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Create New Savings Goal</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="addGoalForm">
+        <div class="input-field-group">
+          <label class="input-label">Goal Title</label>
+          <input id="goalTitleInput" class="input-control" type="text" placeholder="e.g. Dream House Downpayment, Child Education" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Target Amount (₹)</label>
+          <input id="goalTargetInput" class="input-control" type="number" placeholder="₹ Target" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Current Savings (₹)</label>
+          <input id="goalCurrentInput" class="input-control" type="number" placeholder="₹ 0">
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Target Deadline</label>
+          <input id="goalDeadlineInput" class="input-control" type="text" placeholder="e.g. Dec 2028">
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Linked Investment Vehicle</label>
+          <input id="goalVehicleInput" class="input-control" type="text" placeholder="e.g. Nifty 50 Index Fund & Arbitrage">
+        </div>
+        <button type="submit" class="btn-full-primary">Create Goal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. Edit Goal Modal -->
+  <div id="editGoalModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Edit Savings Goal</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="editGoalForm">
+        <input type="hidden" id="editGoalId">
+        <div class="input-field-group">
+          <label class="input-label">Goal Title</label>
+          <input id="editGoalTitleInput" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Target Amount (₹)</label>
+          <input id="editGoalTargetInput" class="input-control" type="number" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Current Saved Amount (₹)</label>
+          <input id="editGoalCurrentInput" class="input-control" type="number" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Target Deadline</label>
+          <input id="editGoalDeadlineInput" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Linked Vehicle</label>
+          <input id="editGoalVehicleInput" class="input-control" type="text" required>
+        </div>
+        <button type="submit" class="btn-full-primary">Save Goal Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. Goal Details Modal -->
+  <div id="goalDetailsModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 id="goalDetailTitle" class="sheet-title">Goal Details</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom: 6px;">
+          <span style="font-size:0.85rem; color:var(--text-secondary);">Target: <strong id="goalDetailTarget" style="color:var(--text-primary);">₹0</strong></span>
+          <span id="goalDetailPct" class="status-pill on-track">0%</span>
+        </div>
+        <div style="font-size:0.9rem; margin-bottom: 12px;">Saved so far: <strong id="goalDetailSaved" style="color:var(--brand-green);">₹0</strong></div>
+        <div style="background:#f9f7f2; border:1px solid #e9e4dc; border-radius:12px; padding:12px; margin-bottom: 12px;">
+          <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:2px;">LINKED INVESTMENT VEHICLE</div>
+          <div id="goalDetailVehicle" style="font-size:0.88rem; font-weight:600;">-</div>
+          <div style="font-size:0.76rem; color:var(--text-secondary); margin-top:8px;">RECOMMENDED SIP CONTRIBUTION</div>
+          <div id="goalDetailRecSIP" style="font-size:0.92rem; font-weight:700; color:#1e6d37;">-</div>
+        </div>
+        <p id="goalDetailDesc" style="font-size:0.82rem; color:var(--text-secondary); line-height:1.4;"></p>
+      </div>
+      <button id="goalDetailContributeBtn" class="btn-full-primary">+ Add Contribution to Goal</button>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+        <button id="goalDetailEditBtn" class="btn-full-secondary">✏️ Edit Goal</button>
+        <button id="goalDetailDeleteBtn" class="btn-full-danger" style="margin-top:0;">🗑️ Delete Goal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Edit Personal Details Modal (With Date of Birth & Dynamic Age) -->
+  <div id="editPersonalDetailsModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Edit Personal Details</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="editPersonalDetailsForm">
+        <div class="input-field-group">
+          <label class="input-label">Full Name</label>
+          <input id="editPersonalName" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Date of Birth</label>
+          <input id="editPersonalDOB" class="input-control" type="date" required onchange="app.updateDOBAgePreview(this.value)">
+          <div id="personalAgePreviewTag" style="font-size:0.76rem; color:#1e6d37; font-weight:600; margin-top:4px;">
+            Calculated Age: 24 years
+          </div>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">City / Location</label>
+          <input id="editPersonalCity" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Phone Number</label>
+          <input id="editPersonalPhone" class="input-control" type="tel" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Email Address</label>
+          <input id="editPersonalEmail" class="input-control" type="email" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">PAN Number</label>
+          <input id="editPersonalPAN" class="input-control" type="text" style="text-transform:uppercase;" required>
+        </div>
+        <button type="submit" class="btn-full-primary">Save Personal Details</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 11. Edit Financial Profile Modal -->
+  <div id="editFinancialProfileModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Edit Financial Profile</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="editFinancialProfileForm">
+        <div class="input-field-group">
+          <label class="input-label">Monthly Income Baseline (₹)</label>
+          <input id="editFinancialIncome" class="input-control" type="number" required>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">
+            This updates your monthly income baseline, budget remaining, and overview pie chart.
+          </div>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Employment / Organisation</label>
+          <input id="editFinancialEmployment" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Role / Designation</label>
+          <input id="editFinancialRole" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Risk Profile</label>
+          <select id="editFinancialRisk" class="input-control">
+            <option value="Conservative">Conservative (Capital Protection focus)</option>
+            <option value="Moderate">Moderate (Balanced Index & Equity Funds)</option>
+            <option value="Aggressive">Aggressive (High Equity, Mid/Small Cap exposure)</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Investment Preferences</label>
+          <input id="editFinancialPref" class="input-control" type="text" placeholder="e.g. Mutual Funds, Equities, Gold, FD" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Income Tax Regime</label>
+          <select id="editFinancialTaxRegime" class="input-control">
+            <option value="New Tax Regime (FY 2026-27)">New Tax Regime (Section 115BAC)</option>
+            <option value="Old Tax Regime with 80C Deductions">Old Tax Regime (Section 80C/80D)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-full-primary">Save Financial Profile</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 12. Start Fresh / Custom User Setup Modal -->
+  <div id="startFreshModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Setup Custom Situation</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <p style="font-size:0.84rem; color:var(--text-secondary); line-height:1.45; margin-bottom:14px;">
+        Start with a clean slate tailored to your personal financial situation and income. You can customize all goals, expenses, and investments.
+      </p>
+      <form id="startFreshForm">
+        <div class="input-field-group">
+          <label class="input-label">Your Name</label>
+          <input id="freshUserName" class="input-control" type="text" placeholder="e.g. Rahul Sharma" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Your City</label>
+          <input id="freshUserCity" class="input-control" type="text" placeholder="e.g. Bengaluru, Mumbai" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Monthly In-Hand Income (₹)</label>
+          <input id="freshUserIncome" class="input-control" type="number" placeholder="₹ e.g. 80000" required>
+        </div>
+        <button type="submit" class="btn-full-primary">Start Clean Slate</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 13. Manage Fixed Expenses Modal -->
+  <div id="manageFixedModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <div>
+          <h3 class="sheet-title">Fixed Recurring Bills</h3>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Automated monthly budget obligations</div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Recurring Items</span>
+        <button class="inflow-manage-btn" style="padding:4px 12px; font-size:0.75rem;" onclick="openModal('addFixedExpenseModal')">+ Add Bill</button>
+      </div>
+      <div id="manageFixedListContainer" style="display:flex; flex-direction:column; gap:8px;">
+        <!-- Populated dynamically -->
+      </div>
+      <button class="btn-full-secondary" style="margin-top:16px;" onclick="closeModal();">Done</button>
+    </div>
+  </div>
+
+  <!-- 13a. Add Fixed Recurring Expense Modal -->
+  <div id="addFixedExpenseModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Add Fixed Recurring Expense</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:14px;">
+        Add regular recurring bills like Rent, Cook/Maid, EMI, Broadband, or Subscriptions.
+      </p>
+      <form id="addFixedExpenseForm">
+        <div class="input-field-group">
+          <label class="input-label">Expense / Bill Name</label>
+          <input id="addFixNameInput" class="input-control" type="text" placeholder="e.g. Cook & Maid, House Rent, Gym" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Monthly Amount (₹)</label>
+          <input id="addFixAmountInput" class="input-control" type="number" placeholder="₹ Amount" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Recurrence / Due Cycle</label>
+          <select id="addFixRecurrenceSelect" class="input-control">
+            <option value="1st every month">1st every month</option>
+            <option value="5th every month">5th every month</option>
+            <option value="10th every month">10th every month</option>
+            <option value="15th every month">15th every month</option>
+            <option value="20th every month">20th every month</option>
+            <option value="Last day of month">Last day of month</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Category</label>
+          <select id="addFixCategorySelect" class="input-control">
+            <option value="Rent & Housing">Rent & Housing</option>
+            <option value="Food & Dining">Food & Dining</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Transport">Transport</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-full-primary">Save Fixed Expense</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 13b. Edit Fixed Recurring Expense Modal -->
+  <div id="editFixedExpenseModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Edit Fixed Recurring Expense</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="editFixedExpenseForm">
+        <input type="hidden" id="editFixId">
+        <div class="input-field-group">
+          <label class="input-label">Expense / Bill Name</label>
+          <input id="editFixNameInput" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Monthly Amount (₹)</label>
+          <input id="editFixAmountInput" class="input-control" type="number" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Recurrence / Due Cycle</label>
+          <select id="editFixRecurrenceSelect" class="input-control">
+            <option value="1st every month">1st every month</option>
+            <option value="5th every month">5th every month</option>
+            <option value="10th every month">10th every month</option>
+            <option value="15th every month">15th every month</option>
+            <option value="20th every month">20th every month</option>
+            <option value="Last day of month">Last day of month</option>
+          </select>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Category</label>
+          <select id="editFixCategorySelect" class="input-control">
+            <option value="Rent & Housing">Rent & Housing</option>
+            <option value="Food & Dining">Food & Dining</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Transport">Transport</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-full-primary">Update Fixed Expense</button>
+        <button type="button" id="deleteFixBtn" class="btn-full-danger">🗑️ Delete Fixed Expense</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 13c. Manage Monthly Fixed Income & Inflow Sources Modal -->
+  <div id="manageIncomeModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <div>
+          <h3 class="sheet-title">Manage Fixed Income</h3>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Configure all income inflows & salary baseline</div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- Quick Total Income Setter -->
+      <div style="background:#f7faf8; border:1px solid #d1e7d9; border-radius:14px; padding:14px; margin-bottom:18px;">
+        <div style="font-size:0.78rem; font-weight:700; color:#1e6d37; margin-bottom:6px; text-transform:uppercase;">
+          ⚡ Quick Set Monthly In-Hand Income
+        </div>
+        <form id="setQuickIncomeForm" style="display:flex; gap:8px;">
+          <input id="quickIncomeInput" class="input-control" type="number" placeholder="₹ Total Monthly Inflow" style="flex:1;" required>
+          <button type="submit" class="inflow-manage-btn" style="white-space:nowrap; padding:0 16px;">Save</button>
+        </form>
+        <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:6px;">
+          Updates monthly income baseline, discretionary buffer, and overview pie chart.
+        </div>
+      </div>
+
+      <!-- Active Income Streams Section -->
+      <div style="margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:0.82rem; font-weight:700; color:var(--text-primary); text-transform:uppercase;">Income Sources Breakdown</span>
+          <span id="incomeSourcesCountBadge" class="status-pill on-track" style="font-size:0.72rem;">1 Source</span>
+        </div>
+        <div id="incomeSourcesListContainer">
+          <!-- Populated by app.js with Edit & Delete options -->
+        </div>
+      </div>
+
+      <!-- Add New Income Stream Form -->
+      <div style="border-top:1px solid var(--border-subtle); padding-top:14px;">
+        <div style="font-size:0.84rem; font-weight:700; color:var(--text-primary); margin-bottom:10px;">
+          + Add Another Income Stream
+        </div>
+        <form id="addIncomeSourceForm">
+          <div class="input-field-group">
+            <label class="input-label">Income Source Name</label>
+            <input id="newIncomeTitleInput" class="input-control" type="text" placeholder="e.g. Rental Flat, Consulting, Family Business" required>
+          </div>
+          <div class="input-field-group">
+            <label class="input-label">Monthly Amount (₹)</label>
+            <input id="newIncomeAmountInput" class="input-control" type="number" placeholder="₹ Amount" required>
+          </div>
+          <div class="input-field-group">
+            <label class="input-label">Income Type</label>
+            <select id="newIncomeTypeSelect" class="input-control">
+              <option value="Fixed Salary">Fixed Salary / Primary Pay</option>
+              <option value="Rental Income">Rental Income</option>
+              <option value="Freelance / Consulting">Freelance / Consulting</option>
+              <option value="Business Inflow">Business Inflow</option>
+              <option value="Dividends / Interest">Dividends & Capital Yield</option>
+              <option value="Other Inflow">Other Inflow</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-full-primary" style="margin-top:10px;">+ Add Income Stream</button>
+        </form>
+      </div>
+
+      <button class="btn-full-secondary" style="margin-top:12px;" onclick="closeModal();">Done</button>
+    </div>
+  </div>
+
+  <!-- 13d. Edit Income Stream Modal -->
+  <div id="editIncomeModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Edit Income Stream</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="editIncomeForm">
+        <input type="hidden" id="editIncomeId">
+        <div class="input-field-group">
+          <label class="input-label">Income Title</label>
+          <input id="editIncomeTitleInput" class="input-control" type="text" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Monthly Amount (₹)</label>
+          <input id="editIncomeAmountInput" class="input-control" type="number" required>
+        </div>
+        <div class="input-field-group">
+          <label class="input-label">Income Type</label>
+          <select id="editIncomeTypeSelect" class="input-control">
+            <option value="Fixed Salary">Fixed Salary / Primary Pay</option>
+            <option value="Rental Income">Rental Income</option>
+            <option value="Freelance / Consulting">Freelance / Consulting</option>
+            <option value="Business Inflow">Business Inflow</option>
+            <option value="Dividends / Interest">Dividends & Capital Yield</option>
+            <option value="Other Inflow">Other Inflow</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-full-primary">Save Income Stream</button>
+        <button type="button" id="deleteIncomeBtn" class="btn-full-danger">🗑️ Delete Income Stream</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 14. Notifications Drawer Modal -->
+  <div id="notificationsModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <h3 class="sheet-title">Alerts & Notifications</h3>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div class="upcoming-action-item">
+          <div class="action-left-col">
+            <div class="action-icon-pill sip-type">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg>
+            </div>
+            <div class="action-details">
+              <span class="action-title">SIP Due Alert</span>
+              <span class="action-subtitle">Parag Parikh Flexi Cap ₹10,000 due 5th Oct</span>
+            </div>
+          </div>
+        </div>
+        <div class="upcoming-action-item">
+          <div class="action-left-col">
+            <div class="action-icon-pill bill-type">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect></svg>
+            </div>
+            <div class="action-details">
+              <span class="action-title">Utility Bill Reminder</span>
+              <span class="action-subtitle">Electricity Bill ₹2,400 due 8th Oct</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-full-primary" style="margin-top:16px;" onclick="closeModal();">Clear All</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 15. Authentication, Account Switcher & Cloud Backup Modal -->
+  <!-- ========================================== -->
+  <div id="authModal" class="modal-backdrop">
+    <div class="bottom-sheet-modal auth-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-row">
+        <div class="sheet-header-title-group">
+          <h3 class="sheet-title" id="authModalTitle">User Account & Persistence</h3>
+          <p class="sheet-subtitle" id="authModalSubtitle">Never lose your financial data across sessions</p>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- Segment Tabs -->
+      <div class="auth-segment-tabs" role="tablist">
+        <button type="button" class="auth-tab-btn active" data-authtab="account" onclick="authManager.switchModalTab('account')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Account</span>
+        </button>
+        <button type="button" class="auth-tab-btn" data-authtab="login" onclick="authManager.switchModalTab('login')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+          <span>Log In</span>
+        </button>
+        <button type="button" class="auth-tab-btn" data-authtab="signup" onclick="authManager.switchModalTab('signup')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+          <span>Sign Up</span>
+        </button>
+        <button type="button" class="auth-tab-btn" data-authtab="backup" onclick="authManager.switchModalTab('backup')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Backup</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: ACCOUNT & SWITCHER -->
+      <div id="authTabAccount" class="auth-tab-pane active">
+        <div class="auth-storage-pill-banner">
+          <span class="storage-shield-icon">🛡️</span>
+          <div>
+            <strong>Dual-Layer Memory Protection Active</strong>
+            <p>Every transaction, SIP, goal and budget is mirrored to IndexedDB and LocalStorage automatically.</p>
+          </div>
+        </div>
+
+        <div class="auth-section-title-bar">
+          <span class="auth-section-label">Accounts on this Device</span>
+          <button type="button" class="btn-text-action" onclick="authManager.switchModalTab('signup')">+ New Account</button>
+        </div>
+
+        <div id="authAccountsList" class="auth-accounts-list">
+          <!-- Rendered dynamically by authManager -->
+        </div>
+
+        <div class="auth-account-footer-actions">
+          <button type="button" class="btn-full-secondary" onclick="authManager.switchModalTab('backup')">
+            ☁️ Cloud & File Backup / Restore
+          </button>
+          <button type="button" id="btnLogoutAction" class="btn-full-danger">
+            🚪 Log Out (Switch to Demo Mode)
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 2: LOG IN -->
+      <div id="authTabLogin" class="auth-tab-pane">
+        <div id="loginErrorNotice" class="auth-error-notice" style="display:none;"></div>
+        <form id="authLoginForm">
+          <div class="input-field-group">
+            <label class="input-label" for="loginIdentifierInput">Email Address or Phone Number</label>
+            <input id="loginIdentifierInput" class="input-control" type="text" placeholder="e.g. rahul@example.com or 9876543210" required autocomplete="username">
+          </div>
+          <div class="input-field-group">
+            <label class="input-label" for="loginPinInput">4-Digit Security PIN or Password</label>
+            <input id="loginPinInput" class="input-control" type="password" maxlength="12" placeholder="e.g. 1234" required autocomplete="current-password" inputmode="numeric">
+          </div>
+          <div class="remember-me-row">
+            <label class="checkbox-container">
+              <input type="checkbox" id="loginRememberMeCheck" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Keep me logged in across browser closes</span>
+            </label>
+          </div>
+          <button type="submit" class="btn-full-primary" style="margin-top:14px;">Log In & Sync Data</button>
+          <div class="auth-demo-hint">
+            <span>Demo credentials: <strong>rahul@example.com</strong> / PIN: <strong>1234</strong></span>
+          </div>
+          <button type="button" id="btnQuickDemoLogin" class="btn-full-secondary" style="margin-top:10px;">
+            ⚡ Quick Demo Login (Rahul Lodhi)
+          </button>
+          <div class="auth-switch-prompt">
+            Don't have an account yet? <a href="javascript:void(0)" onclick="authManager.switchModalTab('signup')">Sign Up here</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- TAB 3: SIGN UP -->
+      <div id="authTabSignup" class="auth-tab-pane">
+        <div id="signupErrorNotice" class="auth-error-notice" style="display:none;"></div>
+        <form id="authSignupForm">
+          <div class="input-field-group">
+            <label class="input-label" for="signupNameInput">Full Name</label>
+            <input id="signupNameInput" class="input-control" type="text" placeholder="e.g. Rahul Lodhi" required autocomplete="name">
+          </div>
+          <div class="form-row-2col">
+            <div class="input-field-group">
+              <label class="input-label" for="signupEmailInput">Email Address</label>
+              <input id="signupEmailInput" class="input-control" type="email" placeholder="rahul@example.com" required autocomplete="email">
+            </div>
+            <div class="input-field-group">
+              <label class="input-label" for="signupPhoneInput">Phone (10-digits)</label>
+              <input id="signupPhoneInput" class="input-control" type="tel" placeholder="9876543210" pattern="[0-9]{10}" autocomplete="tel">
+            </div>
+          </div>
+          <div class="form-row-2col">
+            <div class="input-field-group">
+              <label class="input-label" for="signupPinInput">4-Digit PIN / Password</label>
+              <input id="signupPinInput" class="input-control" type="password" maxlength="12" placeholder="e.g. 1234" required autocomplete="new-password" inputmode="numeric">
+            </div>
+            <div class="input-field-group">
+              <label class="input-label" for="signupIncomeInput">Monthly Income (₹)</label>
+              <input id="signupIncomeInput" class="input-control" type="number" placeholder="75000" min="5000" step="1000" required>
+            </div>
+          </div>
+          <p class="auth-form-help">
+            🔒 An isolated ledger will be allocated for this account. Your data is mirrored to IndexedDB on this device and can be backed up anytime.
+          </p>
+          <button type="submit" class="btn-full-primary" style="margin-top:14px;">Create Account & Save Data</button>
+          <div class="auth-switch-prompt">
+            Already have an account? <a href="javascript:void(0)" onclick="authManager.switchModalTab('login')">Log In here</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- TAB 4: BACKUP & RESTORE -->
+      <div id="authTabBackup" class="auth-tab-pane">
+        <div class="backup-feature-card">
+          <div class="backup-card-header">
+            <span class="backup-icon">📥</span>
+            <div>
+              <h4 class="backup-card-title">Download Device Backup</h4>
+              <p class="backup-card-sub">Export your entire financial profile, expenses, SIPs, holdings, and budgets as a portable JSON file.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button type="button" id="btnExportBackup" class="btn-full-primary" style="margin:0; flex:1;">
+              📥 Download File (.json)
+            </button>
+            <button type="button" id="btnCopyBackupJSON" class="btn-full-secondary" style="margin:0; flex:1;">
+              📋 Copy to Clipboard
+            </button>
+          </div>
+        </div>
+
+        <div class="backup-feature-card" style="margin-top:14px;">
+          <div class="backup-card-header">
+            <span class="backup-icon">📤</span>
+            <div>
+              <h4 class="backup-card-title">Restore from Backup</h4>
+              <p class="backup-card-sub">Restoring will instantly recover all your transactions and balances on this phone.</p>
+            </div>
+          </div>
+          <div class="restore-drop-box" style="margin-top:12px;">
+            <label class="file-picker-label" for="restoreBackupFileInput">
+              <span>Choose Backup File (.json)</span>
+              <input type="file" id="restoreBackupFileInput" accept=".json,application/json" style="display:none;">
+            </label>
+          </div>
+
+          <div style="margin-top:12px;">
+            <label class="input-label" for="restoreJSONTextarea" style="font-size:0.75rem;">Or Paste Backup JSON Code Below:</label>
+            <textarea id="restoreJSONTextarea" class="input-control" rows="3" placeholder="Paste { app: 'PaisaTrack', ... } JSON here" style="font-family:monospace; font-size:0.75rem;"></textarea>
+            <button type="button" id="btnPasteRestore" class="btn-full-secondary" style="margin-top:8px; font-size:0.85rem; padding:8px;">
+              Restore from Pasted Code
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: EXPORT FINANCIAL STATEMENT -->
+  <!-- ========================================== -->
+  <div id="exportStatementModal" class="modal-backdrop" data-alias="exportDataModal">
+    <div class="bottom-sheet-modal export-sheet-modal">
+      <div class="sheet-handle-bar"></div>
+      
+      <div class="sheet-header-row">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="export-sheet-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <div>
+            <h3 class="sheet-title">Export Financial Statement</h3>
+            <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">Bank-grade Indian Financial Reports & Spreadsheets</div>
+          </div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- Segment 1: Date Range Type Selector (Monthly vs Custom) -->
+      <div class="export-section-group">
+        <label class="input-label" style="margin-bottom:8px; display:block;">Select Period Type</label>
+        <div class="export-toggle-pills" role="tablist">
+          <button type="button" class="export-toggle-btn active" id="btnExportPeriodMonthly" onclick="exportManager.setExportPeriodType('monthly')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>Monthly Statement</span>
+          </button>
+          <button type="button" class="export-toggle-btn" id="btnExportPeriodCustom" onclick="exportManager.setExportPeriodType('custom')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Custom Date Range</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Option A: Monthly Select Container -->
+      <div id="exportMonthlyOptions" class="export-period-subpanel">
+        <div class="input-field-group" style="margin-bottom:12px;">
+          <label class="input-label" for="exportMonthSelect">Select Statement Month / FY</label>
+          <select id="exportMonthSelect" class="input-control" style="font-weight:600;">
+            <!-- Populated dynamically by ExportManager -->
+            <option value="October 2026">October 2026 (Current Active)</option>
+            <option value="September 2026">September 2026</option>
+            <option value="August 2026">August 2026</option>
+            <option value="July 2026">July 2026</option>
+            <option value="Full Financial Year 2026-27 (FY27)">Full Financial Year 2026-27 (FY27)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Option B: Custom Date Range Container -->
+      <div id="exportCustomOptions" class="export-period-subpanel" style="display:none;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div class="input-field-group" style="margin-bottom:0;">
+            <label class="input-label" for="exportStartDate">Start Date (From)</label>
+            <input type="date" id="exportStartDate" class="input-control" value="2026-10-01">
+          </div>
+          <div class="input-field-group" style="margin-bottom:0;">
+            <label class="input-label" for="exportEndDate">End Date (To)</label>
+            <input type="date" id="exportEndDate" class="input-control" value="2026-10-15">
+          </div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="export-presets-row">
+          <span style="font-size:0.72rem; color:var(--text-secondary); margin-right:4px;">Quick Range:</span>
+          <button type="button" class="export-preset-pill active" data-preset="thisMonth" onclick="exportManager.setQuickPreset('thisMonth')">This Month</button>
+          <button type="button" class="export-preset-pill" data-preset="lastMonth" onclick="exportManager.setQuickPreset('lastMonth')">Last Month</button>
+          <button type="button" class="export-preset-pill" data-preset="last30Days" onclick="exportManager.setQuickPreset('last30Days')">Last 30 Days</button>
+          <button type="button" class="export-preset-pill" data-preset="fy2026" onclick="exportManager.setQuickPreset('fy2026')">FY 2026-27 YTD</button>
+        </div>
+      </div>
+
+      <!-- Segment 2: Scope Selector -->
+      <div class="export-section-group" style="margin-top:14px;">
+        <label class="input-label" style="margin-bottom:8px; display:block;">Reporting Scope</label>
+        <div class="export-scope-toggle">
+          <button type="button" class="export-scope-btn active" id="btnScopeAll" onclick="exportManager.setExportScope('all')">
+            <span>All Financial Data</span>
+          </button>
+          <button type="button" class="export-scope-btn" id="btnScopeExpenses" onclick="exportManager.setExportScope('expenses')">
+            <span>Expenses Only</span>
+          </button>
+          <button type="button" class="export-scope-btn" id="btnScopeInvestments" onclick="exportManager.setExportScope('investments')">
+            <span>Investments Only</span>
+          </button>
+        </div>
+        <p id="exportScopeHint" class="export-hint-text">
+          Includes executive summary, category budgets, expense ledger, portfolio valuation & SIPs.
+        </p>
+      </div>
+
+      <!-- Format Download Buttons (Prominent Excel vs PDF Split) -->
+      <div class="export-action-buttons-wrap">
+        <label class="input-label" style="margin-bottom:8px; display:block;">Download Statement</label>
+        <div class="export-format-grid">
+          <!-- Excel Option -->
+          <button type="button" class="btn-format-card excel" id="btnExportExcel" onclick="exportManager.exportToExcel()">
+            <div class="format-card-header">
+              <span class="format-icon-badge excel">📗</span>
+              <div class="format-card-text">
+                <span class="format-title">Export to Excel</span>
+                <span class="format-ext">.XLSX / .CSV WORKBOOK</span>
+              </div>
+            </div>
+            <p class="format-desc">Clean spreadsheet with ₹ UTF-8 BOM, summary KPIs, budget variances & itemized ledger.</p>
+          </button>
+
+          <!-- PDF Option -->
+          <button type="button" class="btn-format-card pdf" id="btnExportPDF" onclick="exportManager.exportToPDF()">
+            <div class="format-card-header">
+              <span class="format-icon-badge pdf">📕</span>
+              <div class="format-card-text">
+                <span class="format-title">Download PDF Report</span>
+                <span class="format-ext">BANK-GRADE A4 STATEMENT</span>
+              </div>
+            </div>
+            <p class="format-desc">Official statement with PAN, KYC badge, category breakdown tables & portfolio valuation.</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- Trust & Security Seal Footer -->
+      <div class="export-security-footer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1e6d37" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>Generated 100% on-device. Zero cloud leakage. RBI & Tax Audit ready.</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: BANK-GRADE STATEMENT PRINT & PREVIEW -->
+  <!-- ========================================== -->
+  <div id="statementPreviewModal" class="modal-backdrop statement-preview-backdrop">
+    <div class="statement-preview-window">
+      <!-- Toolbar (Hidden during print) -->
+      <div class="statement-preview-toolbar no-print">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" class="btn-preview-tool close" onclick="exportManager.closeStatementPreview()">
+            ✕ Close Preview
+          </button>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button type="button" class="btn-preview-tool excel" onclick="exportManager.exportToExcel()">
+            📗 Download Excel (.csv)
+          </button>
+          <button type="button" class="btn-preview-tool print-primary" onclick="window.print()">
+            🖨️ Print / Save as PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Statement Document Container (Rendered by exportManager) -->
+      <div class="statement-paper-scroll" id="statementPaperScroll">
+        <div id="printableFinancialStatement">
+          <!-- Injected dynamically by ExportManager.generateStatementHTML() -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Scripts -->
+  <script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
